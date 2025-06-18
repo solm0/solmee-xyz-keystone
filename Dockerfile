@@ -1,6 +1,6 @@
 FROM node:20
 
-WORKDIR /app
+WORKDIR /solmee-xyz-keystone
 
 # Install dependencies
 COPY package*.json ./
@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 
 # Build (optional: only if you use TypeScript or any build steps)
-# RUN npm run build
+RUN npm run build
 
 # Set environment variable
 ENV NODE_ENV=production

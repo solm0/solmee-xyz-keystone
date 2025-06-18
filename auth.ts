@@ -17,8 +17,6 @@
 
 import { randomBytes } from 'node:crypto'
 import { createAuth } from '@keystone-6/auth'
-
-// see https://keystonejs.com/docs/apis/session for the session docs
 import { statelessSessions } from '@keystone-6/core/session'
 
 // withAuth is a function we can use to wrap our base configuration
@@ -29,7 +27,7 @@ const { withAuth } = createAuth({
   // this is a GraphQL query fragment for fetching what data will be attached to a context.session
   //   this can be helpful for when you are writing your access control functions
   //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
-  sessionData: 'name createdAt',
+  sessionData: 'name isAdmin',
   secretField: 'password',
 
   // WARNING: remove initFirstItem functionality in production
@@ -39,7 +37,9 @@ const { withAuth } = createAuth({
     //   you are asking the Keystone AdminUI to create a new user
     //   providing inputs for these fields
     fields: ['name', 'email', 'password'],
-
+    itemData: {
+      isAdmin: true,
+    },
     // it uses context.sudo() to do this, which bypasses any access control you might have
     //   you shouldn't use this in production
   },
@@ -54,6 +54,8 @@ const sessionMaxAge = 60 * 60 * 24 * 30
 const session = statelessSessions({
   maxAge: sessionMaxAge,
   secret: process.env.SESSION_SECRET,
-})
+  sameSite: false,
+  secure: false,
+});
 
 export { withAuth, session }
