@@ -5,6 +5,12 @@ import { withAuth, session } from './auth'
 
 export default withAuth(
   config({
+    server: {
+      cors: {
+        origin: ['http://localhost:3001', 'http://temp.solmee.xyz:3001'],
+        credentials: true,
+      },
+    },
     db: {
       // we're using sqlite for the fastest startup experience
       //   for more information on what database might be appropriate for you

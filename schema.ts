@@ -51,6 +51,13 @@ export const lists = {
           [1, 2],
           [1, 2, 1],
         ],
+        relationships: {
+          tag: {
+            listKey: 'Tag',
+            label: 'Tag',
+            selection: 'id name',
+          },
+        },
       }),
 
       author: relationship({
