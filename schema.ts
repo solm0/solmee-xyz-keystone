@@ -91,6 +91,10 @@ export const lists = {
         },
       }),
 
+      meta: checkbox({
+        defaultValue: false,
+      }),
+
       status: select({
         options: [
           { label: 'Published', value: 'published' },
