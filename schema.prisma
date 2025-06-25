@@ -28,13 +28,11 @@ model Post {
   content     Json      @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
   author      User?     @relation("Post_author", fields: [authorId], references: [id])
   authorId    String?   @map("author")
-  tags        Tag?      @relation("Post_tags", fields: [tagsId], references: [id])
-  tagsId      String?   @map("tags")
+  tags        Tag[]     @relation("Post_tags")
   meta        Boolean   @default(false)
   status      String?   @default("draft")
 
   @@index([authorId])
-  @@index([tagsId])
 }
 
 model Tag {

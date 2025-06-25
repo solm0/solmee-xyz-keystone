@@ -156,7 +156,8 @@ type Post {
   publishedAt: DateTime
   content: Post_content_Document
   author: User
-  tags: Tag
+  tags(where: TagWhereInput! = {}, orderBy: [TagOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TagWhereUniqueInput): [Tag!]
+  tagsCount(where: TagWhereInput! = {}): Int
   meta: Boolean
   status: String
 }
@@ -177,9 +178,15 @@ input PostWhereInput {
   title: StringFilter
   publishedAt: DateTimeNullableFilter
   author: UserWhereInput
-  tags: TagWhereInput
+  tags: TagManyRelationFilter
   meta: BooleanFilter
   status: StringNullableFilter
+}
+
+input TagManyRelationFilter {
+  every: TagWhereInput
+  some: TagWhereInput
+  none: TagWhereInput
 }
 
 input StringNullableFilter {
@@ -210,7 +217,7 @@ input PostUpdateInput {
   publishedAt: DateTime
   content: JSON
   author: UserRelateToOneForUpdateInput
-  tags: TagRelateToOneForUpdateInput
+  tags: TagRelateToManyForUpdateInput
   meta: Boolean
   status: String
 }
@@ -221,10 +228,11 @@ input UserRelateToOneForUpdateInput {
   disconnect: Boolean
 }
 
-input TagRelateToOneForUpdateInput {
-  create: TagCreateInput
-  connect: TagWhereUniqueInput
-  disconnect: Boolean
+input TagRelateToManyForUpdateInput {
+  disconnect: [TagWhereUniqueInput!]
+  set: [TagWhereUniqueInput!]
+  create: [TagCreateInput!]
+  connect: [TagWhereUniqueInput!]
 }
 
 input PostUpdateArgs {
@@ -237,7 +245,7 @@ input PostCreateInput {
   publishedAt: DateTime
   content: JSON
   author: UserRelateToOneForCreateInput
-  tags: TagRelateToOneForCreateInput
+  tags: TagRelateToManyForCreateInput
   meta: Boolean
   status: String
 }
@@ -247,9 +255,9 @@ input UserRelateToOneForCreateInput {
   connect: UserWhereUniqueInput
 }
 
-input TagRelateToOneForCreateInput {
-  create: TagCreateInput
-  connect: TagWhereUniqueInput
+input TagRelateToManyForCreateInput {
+  create: [TagCreateInput!]
+  connect: [TagWhereUniqueInput!]
 }
 
 type Tag {
