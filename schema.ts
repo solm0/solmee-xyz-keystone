@@ -72,15 +72,9 @@ export const lists = {
         },
       }),
 
-      // with this field, you can add some Tags to Posts
       tags: relationship({
-        // we could have used 'Tag', but then the relationship would only be 1-way
         ref: 'Tag.posts',
-
-        // a Post can have many Tags, not just one
-        many: true,
-
-        // this is some customisations for changing how this will look in the AdminUI
+        many: false,
         ui: {
           displayMode: 'cards',
           cardFields: ['name'],
