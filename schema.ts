@@ -58,7 +58,21 @@ export const lists = {
           post: {
             listKey: 'Post',
             label: 'Internal Link',
-            selection: 'id title',
+            selection: `
+              id
+              title
+              links {
+                id
+                title
+              }
+              backlinks {
+                id
+                title
+              }
+              content {
+                document(hydrateRelationships: true)
+              }
+            `,
           }
         },
       }),
