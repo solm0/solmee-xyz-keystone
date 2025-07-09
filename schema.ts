@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { list } from '@keystone-6/core'
 import { allowAll } from '@keystone-6/core/access'
 
@@ -33,10 +34,81 @@ export const lists = {
 
   Post: list({
     access: allowAll,
+    hooks: {
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === 'create') {
+          const keywordsToConnect = [{ id: "cmcw2y3j70000s1hgxqe8z37r" }, { id: "cmcw2yaow0001s1hg0z2apxp3" }];
+          // const keywordsToCreate = [{ name: "안녕" }];
+
+          await context.query.Post.updateOne({
+            where: { id: item.id },
+            data: {
+              keywords: {
+                connect: keywordsToConnect,
+                // create: keywordsToCreate
+              },
+            } as any,
+            query: 'id keywords { id name }',
+          });
+        }
+      },
+      beforeOperation: async ({ operation, resolvedData }) => {
+        if (operation === 'create') {
+          const hasTag = resolvedData.tags?.connect?.id;
+
+          if (!hasTag) {
+            resolvedData.tags = {
+              connect: { id: process.env.DEFAULT_TAG_ID },
+            };
+          }
+        }
+      },
+    },
     fields: {
       title: text({ validation: { isRequired: true } }),
       publishedAt: timestamp(),
       content: document({
+        hooks: {
+          beforeOperation: async ({ operation, item, resolvedData, context }) => {
+            if ((operation === 'update' || operation === 'create') && resolvedData.content) {
+              const extractLinkedPostIds = (nodes: any[]): string[] => {
+                const ids: string[] = [];
+          
+                for (const node of nodes) {
+                  if (node.type === 'relationship' && node.relationship === 'post' && node.data?.id) {
+                    ids.push(node.data.id);
+                  }
+                  if (node.children) {
+                    ids.push(...extractLinkedPostIds(node.children));
+                  }
+                }
+          
+                return ids;
+              };
+          
+              const newContent = resolvedData.content as any[];
+              const oldContent = item?.content as any[] || [];
+          
+              const newIds = new Set(extractLinkedPostIds(newContent));
+              const oldIds = new Set(extractLinkedPostIds(oldContent));
+          
+              const toConnect = [...newIds].filter(id => !oldIds.has(id));
+              const toDisconnect = [...oldIds].filter(id => !newIds.has(id));
+          
+              if (toConnect.length || toDisconnect.length) {
+                await context.query.Post.updateOne({
+                  where: { id: item?.id },
+                  data: {
+                    internalLinks: {
+                      ...(toConnect.length ? { connect: toConnect.map(id => ({ id })) } : {}),
+                      ...(toDisconnect.length ? { disconnect: toDisconnect.map(id => ({ id })) } : {}),
+                    }
+                  },
+                });
+              }
+            }
+          }
+        },
         formatting: {
           inlineMarks: true,
           listTypes: true,
@@ -119,6 +191,28 @@ export const lists = {
         }
       }),
 
+      internalLinks: relationship({
+        ref: 'Post.internalBacklinks',
+        many: true,
+        ui: {
+          displayMode: 'cards',
+          cardFields: ['title'],
+          linkToItem: true,
+          inlineConnect: false,
+        }
+      }),
+
+      internalBacklinks: relationship({
+        ref: 'Post.internalLinks',
+        many: true,
+        ui: {
+          displayMode: 'cards',
+          cardFields: ['title'],
+          linkToItem: true,
+          inlineConnect: false,
+        }
+      }),
+
       meta: checkbox({
         defaultValue: false,
       }),
@@ -150,7 +244,7 @@ export const lists = {
   Keyword: list({
     access: allowAll,
     fields: {
-      name: text(),
+      name: text({ isIndexed: 'unique' }),
       posts: relationship({ ref: 'Post.keywords', many: true }),
     },
   }),
