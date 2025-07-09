@@ -69,9 +69,6 @@ export const lists = {
                 id
                 title
               }
-              content {
-                document(hydrateRelationships: true)
-              }
             `,
           }
         },

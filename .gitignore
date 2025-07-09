@@ -5,3 +5,5 @@ keystone.db
 .env
 
 Dockerfile
+schema.graphql
+schema.prisma
