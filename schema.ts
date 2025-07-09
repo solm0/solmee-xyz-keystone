@@ -85,6 +85,17 @@ export const lists = {
         },
       }),
 
+      keywords: relationship({
+        ref: 'Keyword.posts',
+        many: true,
+        ui: {
+          displayMode: 'cards',
+          cardFields: ['name'],
+          linkToItem: true,
+          inlineConnect: true,
+        },
+      }),
+
       links: relationship({
         ref: 'Post.backlinks',
         many: true,
@@ -135,4 +146,13 @@ export const lists = {
       posts: relationship({ ref: 'Post.tags', many: true }),
     },
   }),
+
+  Keyword: list({
+    access: allowAll,
+    fields: {
+      name: text(),
+      posts: relationship({ ref: 'Post.keywords', many: true }),
+    },
+  }),
+
 } satisfies Lists
