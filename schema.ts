@@ -69,8 +69,8 @@ export const lists = {
       publishedAt: timestamp(),
       content: document({
         hooks: {
-          beforeOperation: async ({ operation, item, resolvedData, context }) => {
-            if ((operation === 'update' || operation === 'create') && resolvedData.content) {
+          afterOperation: async ({ operation, item, context }) => {
+            if ((operation === 'update' || operation === 'create') && item?.content) {
               const extractLinkedPostIds = (nodes: any[]): string[] => {
                 const ids: string[] = [];
           
@@ -86,26 +86,19 @@ export const lists = {
                 return ids;
               };
           
-              const newContent = resolvedData.content as any[];
-              const oldContent = item?.content as any[] || [];
+              const content = item.content as any[];
+              const linkedPostIds = extractLinkedPostIds(content);
+              const uniqueIds = [...new Set(linkedPostIds)];
           
-              const newIds = new Set(extractLinkedPostIds(newContent));
-              const oldIds = new Set(extractLinkedPostIds(oldContent));
-          
-              const toConnect = [...newIds].filter(id => !oldIds.has(id));
-              const toDisconnect = [...oldIds].filter(id => !newIds.has(id));
-          
-              if (toConnect.length || toDisconnect.length) {
-                await context.query.Post.updateOne({
-                  where: { id: item?.id },
-                  data: {
-                    internalLinks: {
-                      ...(toConnect.length ? { connect: toConnect.map(id => ({ id })) } : {}),
-                      ...(toDisconnect.length ? { disconnect: toDisconnect.map(id => ({ id })) } : {}),
-                    }
+              // Optional: clear existing links before setting new ones
+              await context.query.Post.updateOne({
+                where: { id: item.id },
+                data: {
+                  internalLinks: {
+                    set: uniqueIds.map(id => ({ id })), // replaces all links
                   },
-                });
-              }
+                },
+              });
             }
           }
         },
