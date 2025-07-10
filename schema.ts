@@ -39,17 +39,7 @@ export const lists = {
   Post: list({
     access: allowAll,
     hooks: {
-      afterOperation: async ({ operation, item, context }) => {
-        if (operation === 'create') {
-          const keywords = await getAllKeywords(context);
-          const text = getText(item.content);
-
-          if (typeof text !== 'string') return;
-          const extracted = extractKeyword(text);
-          
-          saveKeywords(extracted, keywords, context, item.id);
-        }
-      },
+      // 디폴트 태그 저장
       beforeOperation: async ({ operation, resolvedData }) => {
         if (operation === 'create') {
           const hasTag = resolvedData.tags?.connect?.id;
@@ -68,6 +58,8 @@ export const lists = {
       content: document({
         hooks: {
           afterOperation: async ({ operation, item, context }) => {
+
+            // 내부링크 추출, 저장
             if ((operation === 'update' || operation === 'create') && item?.content) {
               const extractLinkedPostIds = (nodes: any[]): string[] => {
                 const ids: string[] = [];
@@ -88,17 +80,27 @@ export const lists = {
               const linkedPostIds = extractLinkedPostIds(content);
               const uniqueIds = [...new Set(linkedPostIds)];
           
-              // Optional: clear existing links before setting new ones
               await context.query.Post.updateOne({
                 where: { id: item.id },
                 data: {
                   internalLinks: {
-                    set: uniqueIds.map(id => ({ id })), // replaces all links
+                    set: uniqueIds.map(id => ({ id })),
                   },
                 },
               });
             }
-          }
+
+            // 키워드 추출, 저장
+            if (operation === 'update' || operation === 'create') {
+              const keywords = await getAllKeywords(context);
+              const text = getText(item.content);
+    
+              if (typeof text !== 'string') return;
+              const extracted = extractKeyword(text);
+              
+              saveKeywords(extracted, keywords, context, item.id);
+            }
+          },
         },
         formatting: {
           inlineMarks: true,

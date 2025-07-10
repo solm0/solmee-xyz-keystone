@@ -6,25 +6,25 @@ export default async function saveKeywords(
   context: Context,
   postId: string,
 ) {
-  let keywordsToConnect: {id: string}[] = [];
+  let keywordsToSet: {id: string}[] = [];
   let keywordsToCreate: {name: string}[] = [];
 
   extracted.forEach((kw) => {
     const match = existing.find((e) => e.name === kw);
     if (match) {
-      keywordsToConnect.push({id: match.id});
+      keywordsToSet.push({id: match.id});
     } else if (!keywordsToCreate.find((k) => k.name === kw)) {
       keywordsToCreate.push({name: kw});
     }
   })
   
-  console.log("keywordsToConnect:",keywordsToConnect, "keywordsToCreate:", keywordsToCreate)
+  console.log("keywordsToSet:", keywordsToSet, "keywordsToCreate:", keywordsToCreate)
 
   await context.query.Post.updateOne({
     where: { id: postId },
     data: {
       keywords: {
-        connect: keywordsToConnect,
+        set: keywordsToSet,
         create: keywordsToCreate,
       },
     },
