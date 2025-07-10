@@ -12,6 +12,7 @@
     "@keystone-6/core": "^6.0.0",
     "@keystone-6/fields-document": "^9.0.0",
     "dotenv": "^16.5.0",
+    "stopwords-ko": "^0.2.0",
     "typescript": "^5.5.0"
   }
 }

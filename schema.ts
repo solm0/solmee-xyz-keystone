@@ -14,6 +14,10 @@ import {
 
 import { document } from '@keystone-6/fields-document'
 import { type Lists } from '.keystone/types'
+import extractKeyword from './lib/extract-keywords'
+import getAllKeywords from './lib/get-all-keywords'
+import getText from './lib/get-text'
+import saveKeywords from './lib/save-keywords'
 
 export const lists = {
   User: list({
@@ -37,19 +41,13 @@ export const lists = {
     hooks: {
       afterOperation: async ({ operation, item, context }) => {
         if (operation === 'create') {
-          const keywordsToConnect = [{ id: "cmcw2y3j70000s1hgxqe8z37r" }, { id: "cmcw2yaow0001s1hg0z2apxp3" }];
-          // const keywordsToCreate = [{ name: "안녕" }];
+          const keywords = await getAllKeywords(context);
+          const text = getText(item.content);
 
-          await context.query.Post.updateOne({
-            where: { id: item.id },
-            data: {
-              keywords: {
-                connect: keywordsToConnect,
-                // create: keywordsToCreate
-              },
-            } as any,
-            query: 'id keywords { id name }',
-          });
+          if (typeof text !== 'string') return;
+          const extracted = extractKeyword(text);
+          
+          saveKeywords(extracted, keywords, context, item.id);
         }
       },
       beforeOperation: async ({ operation, resolvedData }) => {
