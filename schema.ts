@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { list } from '@keystone-6/core'
+import { graphql, list } from '@keystone-6/core'
 import { allowAll } from '@keystone-6/core/access'
 
 import {
@@ -10,6 +10,7 @@ import {
   select,
   checkbox,
   integer,
+  virtual,
 } from '@keystone-6/core/fields'
 
 import { document } from '@keystone-6/fields-document'
@@ -18,6 +19,7 @@ import extractKeyword from './lib/extract-keywords'
 import getAllKeywords from './lib/get-all-keywords'
 import getText from './lib/get-text'
 import saveKeywords from './lib/save-keywords'
+import { componentBlocks } from './component-blocks'
 
 export const lists = {
   User: list({
@@ -56,6 +58,9 @@ export const lists = {
       title: text({ validation: { isRequired: true } }),
       publishedAt: timestamp(),
       content: document({
+        ui: {
+          views: './component-blocks'
+        },
         hooks: {
           afterOperation: async ({ operation, item, context }) => {
 
@@ -65,11 +70,8 @@ export const lists = {
                 const ids: string[] = [];
           
                 for (const node of nodes) {
-                  if (node.type === 'relationship' && node.relationship === 'post' && node.data?.id) {
-                    ids.push(node.data.id);
-                  }
-                  if (node.children) {
-                    ids.push(...extractLinkedPostIds(node.children));
+                  if (node.type === 'component-block' && node.component === 'internalLink' && node.props.post.id) {
+                    ids.push(node.props.post.id);
                   }
                 }
           
@@ -119,24 +121,39 @@ export const lists = {
           [1, 2],
           [1, 2, 1],
         ],
-        relationships: {
-          post: {
-            listKey: 'Post',
-            label: 'Internal Link',
-            selection: `
-              id
-              title
-              links {
-                id
-                title
+        componentBlocks,
+      }),
+
+      excerpt: virtual({
+        field: graphql.field({
+          type: graphql.String,
+          args: {
+            length: graphql.arg({
+              type: graphql.nonNull(graphql.Int),
+              defaultValue: 100
+            }),
+          },
+          resolve(item, args) {
+            if (!item.content) return null;
+      
+            const extractText = (nodes: any): string => {
+              let text = '';
+              for (const node of nodes) {
+                if (typeof node.text === 'string') {
+                  text += node.text;
+                }
+                if (Array.isArray(node.children)) {
+                  text += extractText(node.children);
+                }
               }
-              backlinks {
-                id
-                title
-              }
-            `,
-          }
-        },
+              return text;
+            };
+      
+            const plain = extractText(item.content);
+            if (plain.length <= args.length) return plain;
+            return plain.slice(0, args.length - 3) + '...';
+          },
+        }),
       }),
 
       tags: relationship({
