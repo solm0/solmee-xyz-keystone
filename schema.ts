@@ -109,7 +109,10 @@ export const lists = {
           listTypes: true,
           alignment: true,
           headingLevels: [2, 3, 4],
-          blockTypes: true,
+          blockTypes: {
+            blockquote: true,
+            code: false,
+          },
           softBreaks: true,
         },
         links: true,
@@ -140,7 +143,7 @@ export const lists = {
               let text = '';
               for (const node of nodes) {
                 if (typeof node.text === 'string') {
-                  text += node.text;
+                  text += node.text + ' ';
                 }
                 if (Array.isArray(node.children)) {
                   text += extractText(node.children);
