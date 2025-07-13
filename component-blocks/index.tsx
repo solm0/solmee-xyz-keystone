@@ -86,6 +86,7 @@ export const componentBlocks = {
     },
     chromeless: false,
   }),
+
   quote: component({
     preview: (props) => {
       return (
@@ -227,6 +228,73 @@ export const componentBlocks = {
           </button>
         </div>
       );
+    },
+  }),
+
+  carousel: component({
+    label: 'Carousel',
+    preview: function Preview(props) {
+      return (
+        <NotEditable>
+          <div
+            style={{
+              overflowY: 'scroll',
+              display: 'flex',
+              scrollSnapType: 'y mandatory',
+            }}
+          >
+            {props.fields.items.elements.map(item => {
+              return (
+                <div
+                  key={item.key}
+                  style={{
+                    minWidth: '61.8%',
+                    scrollSnapAlign: 'center',
+                    scrollSnapStop: 'always',
+                    margin: 4,
+                    padding: 8,
+                    boxSizing: 'border-box',
+                    borderRadius: 6,
+                    background: '#eff3f6',
+                  }}
+                >
+                  <img
+                    role="presentation"
+                    src={item.fields.imageSrc.value}
+                    style={{
+                      objectFit: 'cover',
+                      objectPosition: 'center center',
+                      height: 240,
+                      width: '100%',
+                      borderRadius: 4,
+                    }}
+                  />
+                  <p
+                    style={{
+                      fontSize: '0.8rem',
+                      lineHeight: 'unset',
+                      marginTop: 4,
+                    }}
+                  >
+                    {item.fields.alt.value}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </NotEditable>
+      )
+    },
+    schema: {
+      items: fields.array(
+        fields.object({
+          alt: fields.text({ label: 'Alternate Text' }),
+          imageSrc: fields.url({
+            label: 'Image URL',
+            defaultValue: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809',
+          }),
+        })
+      ),
     },
   })
 };
