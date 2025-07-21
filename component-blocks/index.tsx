@@ -40,7 +40,7 @@ export const componentBlocks = {
           <div style={{background: '#F5F5F5', padding: '0.5em', borderRadius: '4px', border: '1px solid lightGray'}}>
             <pre
               style={{
-                fontSize: '1em',
+                fontSize: '0.8em',
                 fontFamily: 'monospace',
               }}
             >
@@ -56,8 +56,9 @@ export const componentBlocks = {
     label: 'Internal Link',
     preview: (props) => {
       const alias = props.fields.alias.element;
+      const post = props.fields.post.value?.label;
       return (
-        <span>{alias}</span>
+        <span>Alias:{alias}, Post:{post}</span>
       );
     },
     schema: {

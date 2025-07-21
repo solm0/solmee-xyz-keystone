@@ -56,7 +56,9 @@ export const lists = {
     },
     fields: {
       title: text({ validation: { isRequired: true } }),
-      publishedAt: timestamp(),
+      publishedAt: timestamp({
+        validation: { isRequired: true },
+      }),
       content: document({
         ui: {
           views: './component-blocks'
@@ -158,6 +160,8 @@ export const lists = {
           },
         }),
       }),
+
+      thumbnail: text(),
 
       tags: relationship({
         ref: 'Tag.posts',
