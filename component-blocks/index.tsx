@@ -55,16 +55,16 @@ export const componentBlocks = {
   internalLink: component({
     label: 'Internal Link',
     preview: (props) => {
-      const alias = props.fields.alias.element;
+      const src = props.fields.src.element;
       const post = props.fields.post.value?.label;
       return (
-        <span>Alias:{alias}, Post:{post}</span>
+        <span>src:{src}, Post:{post}</span>
       );
     },
     schema: {
-      alias: fields.child({
+      src: fields.child({
         kind: 'inline',
-        placeholder: 'Alias',
+        placeholder: 'src',
         formatting: { inlineMarks: 'inherit', softBreaks: 'inherit' },
         links: 'inherit',
       }),
@@ -302,5 +302,23 @@ export const componentBlocks = {
         })
       ),
     },
-  })
+  }),
+
+  iframe: component({
+    label: 'Iframe',
+    preview: (props) => {
+      const src = props.fields.src.element;
+      
+      return (
+        <span>src:{src}</span>
+      );
+    },
+    schema: {
+      src: fields.child({
+        kind: 'inline',
+        placeholder: '',
+      })
+    },
+    chromeless: true,
+  }),
 };
