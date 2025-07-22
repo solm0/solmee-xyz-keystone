@@ -245,6 +245,11 @@ export const componentBlocks = {
             }}
           >
             {props.fields.items.elements.map(item => {
+              const cloudName = "dpqjfptr6";
+              const publicId = item.fields.imageSrc.value;
+              const transformations = "f_auto,q_auto,w_800";
+              const imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${transformations}/${publicId}.jpg`;
+
               return (
                 <div
                   key={item.key}
@@ -261,7 +266,7 @@ export const componentBlocks = {
                 >
                   <img
                     role="presentation"
-                    src={item.fields.imageSrc.value}
+                    src={imageUrl}
                     style={{
                       objectFit: 'cover',
                       objectPosition: 'center center',
